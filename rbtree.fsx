@@ -1,5 +1,3 @@
-open System
-
 type Color = 
     | Red
     | Black
@@ -7,6 +5,15 @@ type Color =
 type Tree<'T> = 
     | Empty
     | Node of color: Color * left: Tree<'T> * value: 'T * right: Tree<'T>
+
+type Result<'T> =
+    | Done of 'T
+    | ToDo of 'T
+
+let bind r f =
+    match r with 
+    | Done x -> Done x
+    | ToDo x -> f x
 
 let rec contains tree v =
     match tree with 
@@ -22,30 +29,34 @@ let balance tree  =
     | Node(Black, Node(Red, a, x, Node(Red, b, y, c)), z, d)
     | Node(Black, a, x, Node(Red, Node(Red, b, y, c), z, d))
     | Node(Black, a, x, Node(Red, b, y, Node(Red, c, z, d))) ->
-        Node(Red, Node(Black, a, x, b), y, Node(Black, c, z, d))
-    | _ -> tree 
+        ToDo (Node(Red, Node(Black, a, x, b), y, Node(Black, c, z, d)))
+    | Node(Black, a, x, b) as n -> Done (n)
+    | Node(Red, a, x, b) as n -> ToDo (n)
+    | Empty -> Done (Empty)
 
 
 let rec insertRec tree v =
     match tree with 
-    | Empty -> Node(Red, Empty, v, Empty)
+    | Empty -> ToDo (Node(Red, Empty, v, Empty))
     | Node(color, left, value, right) ->
         if value > v then 
-            let leftSubtree = insertRec left v 
-            let newTree = Node(color, leftSubtree, value, right)
-            balance newTree 
+            let leftSubtree = insertRec left v
+            bind leftSubtree balance
         elif value < v then
             let rightSubtree = insertRec right v
-            let newTree = Node(color, left, value, rightSubtree)
-            balance newTree
+            bind rightSubtree balance
         else  
-            tree
+            Done (tree)
 
 let insert tree v =
     let newTree = insertRec tree v
-    match newTree with 
-    | Node(Red, left, value, right) -> Node(Black, left, value, right) 
-    | _ -> newTree
+    let t= 
+        match newTree with 
+        | Done t -> t
+        | ToDo t  -> t
+    match t with 
+    | Node(Red, a, x, b) -> Node(Black, a, x, b)
+    | _ -> t
 
 let tree0 = Empty
 let tree1 = insert tree0 5
