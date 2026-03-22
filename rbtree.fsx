@@ -10,11 +10,6 @@ type Result<'T> =
     | Done of 'T
     | ToDo of 'T
 
-let bind r f =
-    match r with 
-    | Done x -> Done x
-    | ToDo x -> f x
-
 let rec contains tree v =
     match tree with 
     | Empty -> false 
@@ -40,11 +35,15 @@ let rec insertRec tree v =
     | Empty -> ToDo (Node(Red, Empty, v, Empty))
     | Node(color, left, value, right) ->
         if value > v then 
-            let leftSubtree = insertRec left v
-            bind leftSubtree balance
+            let newLeft = insertRec left v 
+            match newLeft with 
+                | Done nl -> Done (Node(color, nl, value, right))
+                | ToDo nl -> balance (Node(color, nl, value, right))
         elif value < v then
-            let rightSubtree = insertRec right v
-            bind rightSubtree balance
+            let newRight = insertRec right v 
+            match newRight with 
+                | Done nr -> Done (Node(color, left, value, nr))
+                | ToDo nr -> balance (Node(color, left, value, nr))
         else  
             Done (tree)
 
@@ -66,5 +65,5 @@ let tree4 = insert tree3 1
 let tree5 = insert tree4 9
 let tree6 = insert tree5 4
 
-printfn "Contains 4? %b" (contains tree6 4)
+printfn "Contains 5? %b" (contains tree6 5)
 printfn "Contains 6? %b" (contains tree6 6)
