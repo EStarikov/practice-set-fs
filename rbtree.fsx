@@ -26,10 +26,8 @@ let balance tree  =
     | Node(Black, a, x, Node(Red, b, y, Node(Red, c, z, d))) ->
         ToDo (Node(Red, Node(Black, a, x, b), y, Node(Black, c, z, d)))
     | Node(Black, a, x, b) as n -> Done (n)
-    | Node(Red, a, x, b) as n -> ToDo (n)
-    | Empty -> Done (Empty)
-
-
+    | _ -> ToDo (tree)
+    
 let rec insertRec tree v =
     match tree with 
     | Empty -> ToDo (Node(Red, Empty, v, Empty))
@@ -56,6 +54,60 @@ let insert tree v =
     match t with 
     | Node(Red, a, x, b) -> Node(Black, a, x, b)
     | _ -> t
+
+let blacken tree =
+    match tree with
+    | Node(Red, a ,x, b) -> Done (Node(Black, a, x, b))
+    | _ -> ToDo tree
+    
+let balanceDel tree =
+    match tree with
+    | Node(color,Node(Red, Node(Red, a, x, b), y, c), z, d )
+    | Node(color, Node(Red, a, x, Node(Red, b, y, c)), z, d)
+    | Node(color, a, x, Node(Red, Node(Red, b, y, c), z, d))
+    | Node(color, a, x, Node(Red, b, y, Node(Red, c, z, d))) ->
+        Done (Node(color, Node(Black, a, x, b), y, Node(Black, c, z, d)))
+    | _ -> blacken tree
+
+let rec eqL tree =
+    match tree with 
+    | Node(color, a, x, Node(Black, b, y, c)) -> balanceDel (Node(color, a, x, Node(Red, b, y, c)))
+    | Node(color, a, x, Node(Red, b, y, c)) -> 
+        let newLeft = eqL (Node(Red, a, x, b))
+        match newLeft with 
+        | Done nl -> Done (Node(Black, nl, y, c))
+        | ToDo nl -> ToDo (Node(Black, nl, y, c))
+
+let rec eqR tree =
+    match tree with 
+    | Node(color, Node(Black, a, x, b), y, c) -> balanceDel (Node(color, Node(Red, a, x, b), y, c))
+    | Node(color, Node(Red, a, x, b), y, c) -> 
+    let newRight = eqR (Node(Red, b, y, c))
+    match newRight with
+    | Done nr -> Done (Node(Black, a, x, nr))
+    | ToDo nr -> ToDo (Node(Black, a, x, nr))
+
+let delCur tree =
+    match tree with 
+    | Node(Red, a, y, Empty) -> Done a
+    | Node(Black, a, x, Empty) -> blacken a
+    
+let rec deleteRec tree v =
+    match tree with
+    | Empty -> Done (Empty)
+    | Node(color, left,value , right) ->
+        if  value > v then 
+            let newLeft = deleteRec left v
+            match newLeft with 
+            | Done nl -> Done (Node(color, nl, value, right))
+            | ToDo nl -> eqL (Node(color, nl, value, right))
+        elif value < v then
+            let newRight = deleteRec right v
+            match newRight with 
+            | Done nr -> Done (Node(color, left, value, nr))
+            | ToDo nr -> eqR (Node(color, left, value, nr))
+        else 
+            delCur tree 
 
 let tree0 = Empty
 let tree1 = insert tree0 5
