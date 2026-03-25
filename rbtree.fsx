@@ -82,15 +82,31 @@ let rec eqR tree =
     match tree with 
     | Node(color, Node(Black, a, x, b), y, c) -> balanceDel (Node(color, Node(Red, a, x, b), y, c))
     | Node(color, Node(Red, a, x, b), y, c) -> 
-    let newRight = eqR (Node(Red, b, y, c))
-    match newRight with
-    | Done nr -> Done (Node(Black, a, x, nr))
-    | ToDo nr -> ToDo (Node(Black, a, x, nr))
+        let newRight = eqR (Node(Red, b, y, c))
+        match newRight with
+        | Done nr -> Done (Node(Black, a, x, nr))
+        | ToDo nr -> ToDo (Node(Black, a, x, nr))
+
+let rec delMin tree =
+    match tree with 
+    | Node(Red, Empty, x, b) -> (Done b, x)
+    | Node(Black, Empty, x, b) -> (blacken b, x)
+    | Node(color, a, x, b) -> 
+        let (an, min) = delMin a
+        match an with 
+        | Done t -> (Done (Node(color, t, x, b)), min)
+        | ToDo t -> (eqL (Node(color, t, x, b)), min)
 
 let delCur tree =
     match tree with 
     | Node(Red, a, y, Empty) -> Done a
     | Node(Black, a, x, Empty) -> blacken a
+    | Node(color, a, x, b) -> 
+        let (bn, min) = delMin b
+        match bn with 
+        | Done t -> Done (Node(color, a, min, t))
+        | ToDo t  -> eqR (Node(color, a, min, t))
+
     
 let rec deleteRec tree v =
     match tree with
@@ -109,6 +125,16 @@ let rec deleteRec tree v =
         else 
             delCur tree 
 
+let delete tree v =
+    let newTree = deleteRec tree v
+    let t= 
+        match newTree with 
+        | Done t -> t
+        | ToDo t  -> t
+    match t with 
+    | Node(Red, a, x, b) -> Node(Black, a, x, b)
+    | _ -> t
+
 let tree0 = Empty
 let tree1 = insert tree0 5
 let tree2 = insert tree1 3
@@ -118,4 +144,7 @@ let tree5 = insert tree4 9
 let tree6 = insert tree5 4
 
 printfn "Contains 5? %b" (contains tree6 5)
-printfn "Contains 6? %b" (contains tree6 6)
+let tree7 = delete tree6 5
+printfn "Contains 5? %b" (contains tree7 5)
+printfn "Contains 6? %b" (contains tree7 6)
+printfn "Contains 1? %b" (contains tree7 1)
