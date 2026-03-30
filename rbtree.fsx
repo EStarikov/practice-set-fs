@@ -10,6 +10,7 @@ type Result<'T> =
     | Done of 'T
     | ToDo of 'T
 
+//проверка на наличие
 let rec contains tree v =
     match tree with 
     | Empty -> false 
@@ -18,6 +19,7 @@ let rec contains tree v =
     elif value < v then contains right v
     else true
 
+//вставка
 let balance tree  = 
     match tree with
     | Node(Black,Node(Red, Node(Red, a, x, b), y, c), z, d )
@@ -55,6 +57,7 @@ let insert tree v =
     | Node(Red, a, x, b) -> Node(Black, a, x, b)
     | _ -> t
 
+//удаление
 let blacken tree =
     match tree with
     | Node(Red, a ,x, b) -> Done (Node(Black, a, x, b))
@@ -106,7 +109,6 @@ let delCur tree =
         match bn with 
         | Done t -> Done (Node(color, a, min, t))
         | ToDo t  -> eqR (Node(color, a, min, t))
-
     
 let rec deleteRec tree v =
     match tree with
@@ -134,6 +136,59 @@ let delete tree v =
     match t with 
     | Node(Red, a, x, b) -> Node(Black, a, x, b)
     | _ -> t
+
+//join
+let justTree resultTree =
+    match resultTree with
+    | Done t -> t
+    | ToDo t -> t
+
+let rec blackHeight tree=
+    match tree with 
+    | Empty -> 0
+    | Node(Red, l, _, _) -> blackHeight l
+    | Node(Black, l, _, _) -> 1 + (blackHeight l) 
+
+let rec joinLT t1 g t2 targetHeight currentHeight=
+    if targetHeight = currentHeight then Node(Red, t1, g, t2)
+    else 
+        match t2 with 
+        | Node(Red, l, x, r) -> 
+            let newLeft = joinLT t1 g l targetHeight currentHeight
+            justTree (balance (Node(Red, newLeft, x, r)))
+        | Node(Black, l, x, r) -> 
+            let newLeft = joinLT t1 g l targetHeight (currentHeight - 1)
+            justTree (balance (Node(Black, newLeft, x, r)))
+
+let rec joinRT t1 g t2 targetHeight currentHeight =
+    if targetHeight = currentHeight then Node(Red, t1, g, t2)
+    else 
+        match t1 with 
+        | Node(Red, l, x, r) -> 
+            let newRight = joinRT t2 g r targetHeight currentHeight
+            justTree (balance (Node(Red, l, x, newRight)))
+        | Node(Black, l, x, r) -> 
+            let newRight = joinRT t2 g r targetHeight (currentHeight - 1)
+            justTree (balance (Node(Black, l, x, newRight)))
+
+let join t1 g t2 =
+    let h1 = blackHeight t1
+    let h2 = blackHeight t2
+    if h1 = 0 then insert t2 g 
+    else if h2 = 0 then insert t1 g
+    else 
+        if h1 < h2 then 
+            let t  =joinLT t1 g t2 h1 h2
+            match t with 
+            | Node(Red, a, x, b) -> Node(Black, a, x, b)
+            | _ -> t
+        else if h1 > h2 then 
+            let t = joinRT t1 g t2 h2 h1
+            match t with 
+            | Node(Red, a, x, b) -> Node(Black, a, x, b)
+            | _ -> t
+        else 
+            Node(Black, t1, g, t2)
 
 let tree0 = Empty
 let tree1 = insert tree0 5
