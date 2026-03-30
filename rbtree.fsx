@@ -190,6 +190,84 @@ let join t1 g t2 =
         else 
             Node(Black, t1, g, t2)
 
+//merge
+let rec minimum tree =
+    match tree with 
+    | Node(_, Empty, x, _) -> x
+    | Node(_, l, _, _) -> minimum l
+let mergeEQ t1 t2  =
+    let m = minimum t2
+    let t2' = delete t2 m
+    let h2' = blackHeight t2'
+    let h1 = blackHeight t1
+    if h1 = h2' then Node(Red, t1, m, t2')
+    else 
+        match t1 with
+        | Node(_, Node(Red, ll, lx, lr), x, r) -> 
+            Node(Red, Node(Black, ll, lx, lr), x, Node(Black, r, m, t2'))
+        | Node(_, l, x, Node(Red, rl, rx, rr)) ->
+            Node(Black, Node(Red, l, x, rl), rx, Node(Red, rr, m, t2'))
+        | _ -> Node(Black, (justTree (blacken t1)), m, t2')
+
+let rec mergeLT t1 t2 targetHeight currentHeight =
+    if targetHeight = currentHeight then mergeEQ t1 t2
+    else 
+        match t2 with
+        | Node(Red, l ,x , r) ->
+            let newLeft = mergeLT t1 l targetHeight currentHeight
+            justTree (balance (Node(Red, newLeft, x, r)))
+        | Node(Black, l, x, r) ->
+            let newLeft = mergeLT t1 l targetHeight (currentHeight - 1)
+            justTree (balance (Node(Red, newLeft, x, r)))
+
+let rec mergeRT t1 t2 targetHeight currentHeight =
+    if targetHeight = currentHeight then mergeEQ t1 t2 
+    else
+        match t1 with
+        | Node(Red, l, x, r) ->
+            let newRight = mergeRT r t2 targetHeight currentHeight
+            justTree (balance (Node(Red, l, x, newRight)))
+        | Node(Black, l, x, r) ->
+            let newRight = mergeRT r t2 targetHeight (currentHeight - 1)
+            justTree (balance (Node(Red, l, x, newRight)))
+        
+let merge t1 t2 =
+    let h1 = blackHeight t1
+    let h2 = blackHeight t2
+    if h1 = 0 then t2
+    else if h2 = 0 then t1
+    else 
+        if h1 < h2 then 
+            let t = mergeLT t1 t2 h1 h2
+            match t with 
+            | Node(Red, a, x, b) -> Node(Black, a, x, b)
+            | _ -> t
+        else if h1 > h2 then
+            let t = mergeRT t1 t2 h2 h1
+            match t with 
+            | Node(Red, a, x, b) -> Node(Black, a, x, b)
+            | _ -> t
+        else 
+        let t = mergeEQ t1 t2
+        match t with 
+            | Node(Red, a, x, b) -> Node(Black, a, x, b)
+            | _ -> t
+
+//split
+let rec split kx tree =
+    match tree with
+    | Empty -> (Empty, Empty)
+    | Node(_, l, x, r) ->
+        if kx < x then 
+            let (lt, gt) = split kx l
+            (lt, join gt x (justTree (blacken r)))
+        else if kx > x then
+            let (lt, gt) = split kx r
+            (join (justTree (blacken l)) x lt, gt)
+        else 
+            (justTree (blacken (l)), justTree (blacken (r)))
+            
+
 let tree0 = Empty
 let tree1 = insert tree0 5
 let tree2 = insert tree1 3
