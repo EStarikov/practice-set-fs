@@ -1,3 +1,4 @@
+//в качестве референса использовались "Faster, Simpler Red-Black Trees" и Data/Set/RBTree.hs
 type Color =
     | Red
     | Black
@@ -110,19 +111,20 @@ let delete tree v =
             | ToDo nr -> ToDo(Node(Black, a, x, nr))
         | _ -> failwith "Impossible pattern"
 
-    let rec delMin tree =
-        match tree with
-        | Node(Red, Empty, x, b) -> (Done b, x)
-        | Node(Black, Empty, x, b) -> (blacken b, x)
-        | Node(color, a, x, b) ->
-            let (an, min) = delMin a
-
-            match an with
-            | Done t -> (Done(Node(color, t, x, b)), min)
-            | ToDo t -> (eqL (Node(color, t, x, b)), min)
-        | _ -> failwith "Impossible pattern"
-
     let delCur tree =
+
+        let rec delMin tree =
+            match tree with
+            | Node(Red, Empty, x, b) -> (Done b, x)
+            | Node(Black, Empty, x, b) -> (blacken b, x)
+            | Node(color, a, x, b) ->
+                let (an, min) = delMin a
+
+                match an with
+                | Done t -> (Done(Node(color, t, x, b)), min)
+                | ToDo t -> (eqL (Node(color, t, x, b)), min)
+            | _ -> failwith "Impossible pattern"
+
         match tree with
         | Node(Red, a, y, Empty) -> Done a
         | Node(Black, a, x, Empty) -> blacken a
@@ -195,15 +197,11 @@ let join t1 g t2 =
     else if h1 < h2 then
         let t = joinLT t1 g t2 h1 h2
 
-        match t with
-        | Node(Red, a, x, b) -> Node(Black, a, x, b)
-        | _ -> t
+        justTree (blacken t)
     else if h1 > h2 then
         let t = joinRT t1 g t2 h2 h1
 
-        match t with
-        | Node(Red, a, x, b) -> Node(Black, a, x, b)
-        | _ -> t
+        justTree (blacken t)
     else
         Node(Black, t1, g, t2)
 
@@ -266,15 +264,11 @@ let merge t1 t2 =
     else if h1 < h2 then
         let t = mergeLT t1 t2 h1 h2
 
-        match t with
-        | Node(Red, a, x, b) -> Node(Black, a, x, b)
-        | _ -> t
+        justTree (blacken t)
     else if h1 > h2 then
         let t = mergeRT t1 t2 h2 h1
 
-        match t with
-        | Node(Red, a, x, b) -> Node(Black, a, x, b)
-        | _ -> t
+        justTree (blacken t)
     else
         let t = mergeEQ t1 t2
         justTree (blacken t)
