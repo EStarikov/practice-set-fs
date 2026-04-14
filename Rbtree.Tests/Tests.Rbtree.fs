@@ -27,6 +27,16 @@ let rec heightInv tree =
         else 
             lH
 
+let rec blackSonsOfRed tree =
+    match tree with 
+    | Empty -> true
+    | Node(Red, Node(Red, _,_ , _) , _, _) -> false 
+    | Node(Red, _, _, Node(Red, _, _, _)) -> false
+    | Node(_, l, _, r) ->
+        let lC = blackSonsOfRed l
+        let rC = blackSonsOfRed r
+        if lC = false || rC = false then false
+        else true
 
 
 

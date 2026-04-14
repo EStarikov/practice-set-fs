@@ -10,7 +10,7 @@ open System.Reflection
 [<assembly: System.Reflection.AssemblyCompanyAttribute("Rbtree")>]
 [<assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")>]
 [<assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")>]
-[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f5fc34581aed45e46595e554e58e4675f1402c06")>]
+[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7de95092a2782f7d34d17cbe7dcd5e0bf8b9afaf")>]
 [<assembly: System.Reflection.AssemblyProductAttribute("Rbtree")>]
 [<assembly: System.Reflection.AssemblyTitleAttribute("Rbtree")>]
 [<assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")>]
