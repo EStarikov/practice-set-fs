@@ -33,10 +33,7 @@ let rec blackSonsOfRed tree =
     | Node(Red, Node(Red, _,_ , _) , _, _) -> false 
     | Node(Red, _, _, Node(Red, _, _, _)) -> false
     | Node(_, l, _, r) ->
-        let lC = blackSonsOfRed l
-        let rC = blackSonsOfRed r
-        if lC = false || rC = false then false
-        else true
+        blackSonsOfRed l && blackSonsOfRed r
 
 
 
