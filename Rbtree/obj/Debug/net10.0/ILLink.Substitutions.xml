@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<linker>
+  <assembly fullname="Rbtree">
+    <resource name="FSharpSignatureData.Rbtree" action="remove"></resource>
+    <resource name="FSharpSignatureCompressedData.Rbtree" action="remove"></resource>
+    <resource name="FSharpSignatureDataB.Rbtree" action="remove"></resource>
+    <resource name="FSharpSignatureCompressedDataB.Rbtree" action="remove"></resource>
+    <resource name="FSharpOptimizationData.Rbtree" action="remove"></resource>
+    <resource name="FSharpOptimizationCompressedData.Rbtree" action="remove"></resource>
+    <resource name="FSharpOptimizationDataB.Rbtree" action="remove"></resource>
+    <resource name="FSharpOptimizationCompressedDataB.Rbtree" action="remove"></resource>
+    <resource name="FSharpOptimizationInfo.Rbtree" action="remove"></resource>
+    <resource name="FSharpSignatureInfo.Rbtree" action="remove"></resource>
+  </assembly>
+</linker>

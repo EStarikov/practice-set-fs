@@ -1,4 +1,6 @@
 //в качестве референса использовались "Faster, Simpler Red-Black Trees" и Data/Set/RBTree.hs
+module Rbtree
+
 type Color =
     | Red
     | Black
@@ -324,16 +326,3 @@ let rec difference t1 t2 =
         | Node(_, l, x, r) ->
             let (l', r') = split x t1
             merge (difference l' l) (difference r' r)
-
-let tree0 = Empty
-let tree1 = insert tree0 5
-let tree2 = insert tree1 3
-let tree3 = insert tree2 7
-let tree4 = insert tree3 1
-let tree5 = insert tree4 9
-let tree6 = insert tree5 4
-printfn "Contains 5? %b" (contains tree6 5)
-let tree7 = delete tree6 5
-printfn "Contains 5? %b" (contains tree7 5)
-printfn "Contains 6? %b" (contains tree7 6)
-printfn "Contains 1? %b" (contains tree7 1)
