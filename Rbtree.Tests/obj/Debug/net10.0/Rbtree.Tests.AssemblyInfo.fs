@@ -10,7 +10,7 @@ open System.Reflection
 [<assembly: System.Reflection.AssemblyCompanyAttribute("Rbtree.Tests")>]
 [<assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")>]
 [<assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")>]
-[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7de95092a2782f7d34d17cbe7dcd5e0bf8b9afaf")>]
+[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+802636f2b12f93f5186123343ba86b1b1a674938")>]
 [<assembly: System.Reflection.AssemblyProductAttribute("Rbtree.Tests")>]
 [<assembly: System.Reflection.AssemblyTitleAttribute("Rbtree.Tests")>]
 [<assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")>]
