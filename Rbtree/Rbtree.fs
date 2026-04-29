@@ -9,25 +9,27 @@ type Tree<'T> =
     | Empty
     | Node of color: Color * left: Tree<'T> * value: 'T * right: Tree<'T>
 
+let emptySet = Empty
+
 //оболочка, чтобы понимать, надо ли вызывать балансировку на следующих шагах рекурсии
-type Result<'T> =
+type private Result<'T> =
     | Done of 'T
     | ToDo of 'T
 
 //перекраска листа в черный
-let blacken tree =
+let private blacken tree =
     match tree with
     | Node(Red, a, x, b) -> Done(Node(Black, a, x, b))
     | _ -> ToDo tree
 
 //убирает оболочку
-let justTree resultTree =
+let private justTree resultTree =
     match resultTree with
     | Done t -> t
     | ToDo t -> t
 
 //считает черную высоту
-let rec blackHeight tree =
+let rec private blackHeight tree =
     match tree with
     | Empty -> 0
     | Node(Red, l, _, _) -> blackHeight l
@@ -44,7 +46,7 @@ let rec contains tree v =
         else true
 
 //балансировка
-let balance tree =
+let private balance tree =
     match tree with
     | Node(Black, Node(Red, Node(Red, a, x, b), y, c), z, d)
     | Node(Black, Node(Red, a, x, Node(Red, b, y, c)), z, d)
@@ -77,7 +79,7 @@ let insert tree v =
                 Done(tree)
 
     let newTree = insertRec tree v
-    justTree (blacken (justTree newTree))
+    newTree |> justTree |> blacken |> justTree
 
 //удаление
 let delete tree v =
@@ -158,7 +160,7 @@ let delete tree v =
                 delCur tree
 
     let newTree = deleteRec tree v
-    justTree (blacken (justTree newTree))
+    newTree |> justTree |> blacken |> justTree
 
 //join
 let join t1 g t2 =
@@ -170,10 +172,10 @@ let join t1 g t2 =
             match t2 with
             | Node(Red, l, x, r) ->
                 let newLeft = joinLT t1 g l targetHeight currentHeight
-                justTree (balance (Node(Red, newLeft, x, r)))
+                Node(Red, newLeft, x, r) |> balance |> justTree
             | Node(Black, l, x, r) ->
                 let newLeft = joinLT t1 g l targetHeight (currentHeight - 1)
-                justTree (balance (Node(Black, newLeft, x, r)))
+                Node(Black, newLeft, x, r) |> balance |> justTree
             | _ -> failwith "Impossible pattern"
 
     let rec joinRT t1 g t2 targetHeight currentHeight =
@@ -183,10 +185,10 @@ let join t1 g t2 =
             match t1 with
             | Node(Red, l, x, r) ->
                 let newRight = joinRT t2 g r targetHeight currentHeight
-                justTree (balance (Node(Red, l, x, newRight)))
+                Node(Red, l, x, newRight) |> balance |> justTree
             | Node(Black, l, x, r) ->
                 let newRight = joinRT t2 g r targetHeight (currentHeight - 1)
-                justTree (balance (Node(Black, l, x, newRight)))
+                Node(Black, l, x, newRight) |> balance |> justTree
             | _ -> failwith "Impossible pattern"
 
     let h1 = blackHeight t1
@@ -199,11 +201,11 @@ let join t1 g t2 =
     else if h1 < h2 then
         let t = joinLT t1 g t2 h1 h2
 
-        justTree (blacken t)
+        t |> blacken |> justTree
     else if h1 > h2 then
         let t = joinRT t1 g t2 h2 h1
 
-        justTree (blacken t)
+        t |> blacken |> justTree
     else
         Node(Black, t1, g, t2)
 
@@ -237,10 +239,10 @@ let merge t1 t2 =
             match t2 with
             | Node(Red, l, x, r) ->
                 let newLeft = mergeLT t1 l targetHeight currentHeight
-                justTree (balance (Node(Red, newLeft, x, r)))
+                Node(Red, newLeft, x, r) |> balance |> justTree
             | Node(Black, l, x, r) ->
                 let newLeft = mergeLT t1 l targetHeight (currentHeight - 1)
-                justTree (balance (Node(Red, newLeft, x, r)))
+                Node(Red, newLeft, x, r) |> balance |> justTree
             | _ -> failwith "Impossible pattern"
 
     let rec mergeRT t1 t2 targetHeight currentHeight =
@@ -250,10 +252,10 @@ let merge t1 t2 =
             match t1 with
             | Node(Red, l, x, r) ->
                 let newRight = mergeRT r t2 targetHeight currentHeight
-                justTree (balance (Node(Red, l, x, newRight)))
+                Node(Red, l, x, newRight) |> balance |> justTree
             | Node(Black, l, x, r) ->
                 let newRight = mergeRT r t2 targetHeight (currentHeight - 1)
-                justTree (balance (Node(Red, l, x, newRight)))
+                Node(Red, l, x, newRight) |> balance |> justTree
             | _ -> failwith "Impossible pattern"
 
     let h1 = blackHeight t1
@@ -266,14 +268,14 @@ let merge t1 t2 =
     else if h1 < h2 then
         let t = mergeLT t1 t2 h1 h2
 
-        justTree (blacken t)
+        t |> blacken |> justTree
     else if h1 > h2 then
         let t = mergeRT t1 t2 h2 h1
 
-        justTree (blacken t)
+        t |> blacken |> justTree
     else
         let t = mergeEQ t1 t2
-        justTree (blacken t)
+        t |> blacken |> justTree
 
 //split
 let rec split kx tree =

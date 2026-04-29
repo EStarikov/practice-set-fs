@@ -1,7 +1,8 @@
 module Rbtree.Tests
 
 open Rbtree
-open Xunit 
+open Xunit
+open System
 
 let rec blHeightInv tree = 
     match tree with 
@@ -51,7 +52,7 @@ let rec numOfElements tree num =
 
 [<Fact>]
 let oneElement() = 
-    let t1 = Empty
+    let t1 = emptySet
     let t2 = insert t1 4
     let t3 = insert t2 4
     Assert.True(contains t3 4)
@@ -62,7 +63,7 @@ let oneElement() =
 
 [<Fact>]
 let insertSomeElem() =
-    let t1 = Empty
+    let t1 = emptySet
     let t2 = insert t1 5
     let t3 = insert t2 9
     let t4 = insert t3 -7
@@ -77,7 +78,7 @@ let insertSomeElem() =
 
 [<Fact>]
 let deleteSomeElem() =
-    let t1 = Empty
+    let t1 = emptySet
     let t2 = insert t1 5
     let t3 = insert t2 9
     let t4 = insert t3 -7
@@ -94,7 +95,7 @@ let deleteSomeElem() =
 
 [<Fact>]
 let unionSets() =
-    let t1 = Empty
+    let t1 = emptySet
     let t2 = insert t1 5
     let t3 = insert t2 9
     let t4 = insert t3 -7
@@ -102,7 +103,7 @@ let unionSets() =
     let t6 = insert t5 -27
     let t7 = insert t6 13
 
-    let t1' = Empty
+    let t1' = emptySet
     let t2' = insert t1' 2
     let t3' = insert t2' 7
     let t4' = insert t3' 21
@@ -116,7 +117,7 @@ let unionSets() =
 
 [<Fact>]
 let intersectionSets() =
-    let t1 = Empty
+    let t1 = emptySet
     let t2 = insert t1 5
     let t3 = insert t2 9
     let t4 = insert t3 -7
@@ -124,7 +125,7 @@ let intersectionSets() =
     let t6 = insert t5 -27
     let t7 = insert t6 13
 
-    let t1' = Empty
+    let t1' = emptySet
     let t2' = insert t1' 2
     let t3' = insert t2' 7
     let t4' = insert t3' 21
@@ -138,7 +139,7 @@ let intersectionSets() =
 
 [<Fact>]
 let differenceSets() =
-    let t1 = Empty
+    let t1 = emptySet
     let t2 = insert t1 5
     let t3 = insert t2 9
     let t4 = insert t3 -7
@@ -146,7 +147,7 @@ let differenceSets() =
     let t6 = insert t5 -27
     let t7 = insert t6 13
 
-    let t1' = Empty
+    let t1' = emptySet
     let t2' = insert t1' 2
     let t3' = insert t2' 7
     let t4' = insert t3' 21
@@ -157,3 +158,42 @@ let differenceSets() =
     Assert.NotEqual(-1, heightInv tD)
     Assert.True(blackSonsOfRed tD)
     Assert.Equal(4, numOfElements tD 0)
+
+[<Fact>]
+let emptySetProperties() = 
+    let t = emptySet
+    Assert.False(contains t 0)
+    Assert.Equal(0, numOfElements t 0)
+    Assert.Equal(0, blHeightInv t)
+    Assert.True(blackSonsOfRed t)
+
+[<Fact>]
+let largeSetInsertion() = 
+    let randomValues = [for i in 1..1000 -> Random().Next(-10000, 10000)]
+    let tree = Seq.fold (fun acc x -> insert acc x) emptySet randomValues
+    
+    Assert.NotEqual(-1, blHeightInv tree)
+    Assert.True(blackSonsOfRed tree)
+    
+    for x in randomValues do
+        Assert.True(contains tree x)
+
+[<Fact>]
+let deleteRoot() = 
+    let t1 = insert emptySet 5
+    let t2 = insert t1 3
+    let t3 = insert t2 7
+    let t4 = delete t3 5
+    
+    Assert.False(contains t4 5)
+    Assert.True(contains t4 3)
+    Assert.True(contains t4 7)
+    Assert.NotEqual(-1, blHeightInv t4)
+
+[<Fact>]
+let complexRedBlackViolations() = 
+    let values = [1..20]
+    let tree = Seq.fold (fun acc x -> insert acc x) emptySet values
+    
+    Assert.NotEqual(-1, blHeightInv tree)
+    Assert.True(blackSonsOfRed tree)
